@@ -15,6 +15,7 @@ public class SpiderControls : MonoBehaviour
     private Vector2 dragStart;
     private bool isDragging = false;
     public LineRenderer dragLineRenderer;
+    private bool initializeLine = true;
 
     void Start()
     {
@@ -32,8 +33,6 @@ public class SpiderControls : MonoBehaviour
         if (isTouchingWall && isHolding && !isDragging)
         {
             isDragging = true;
-            dragStart = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            dragLineRenderer.SetPosition(0, dragStart);
         }
 
         // Cling while dragging and overlapping wall
@@ -41,6 +40,13 @@ public class SpiderControls : MonoBehaviour
         {
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0f;
+            if (initializeLine && rb.velocity.magnitude < 0.05f)
+            {
+                Debug.Log("Spider is sleeping");
+                dragStart = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                dragLineRenderer.SetPosition(0, dragStart);
+                initializeLine = false;
+            }
             dragLineRenderer.SetPosition(1, Camera.main.ScreenToWorldPoint(Input.mousePosition));
         }
 
@@ -57,6 +63,7 @@ public class SpiderControls : MonoBehaviour
             rb.AddForce(dragVector * launchForce, ForceMode2D.Impulse);
 
             isDragging = false;
+            initializeLine = true;
         }
 
         // Restore gravity if not clinging or dragging
